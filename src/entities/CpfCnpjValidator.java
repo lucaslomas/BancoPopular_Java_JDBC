@@ -11,7 +11,7 @@ public class CpfCnpjValidator{
      *        99999999999
      * @return true se o CPF é válido e false se não é válido
      */
-    public boolean isCpf(String cpf) {
+    public static boolean isCpf(String cpf) {
         cpf = cpf.replace(".", "");
         cpf = cpf.replace("-", "");
 
@@ -80,7 +80,7 @@ public class CpfCnpjValidator{
      * @param cnpj String - o CNPJ pode ser passado no formato 99.999.999/9999-99 ou 99999999999999
      * @return boolean
      */
-    public boolean isCnpj(String cnpj) {
+    public static boolean isCnpj(String cnpj) {
         cnpj = cnpj.replace(".", "");
         cnpj = cnpj.replace("-", "");
         cnpj = cnpj.replace("/", "");

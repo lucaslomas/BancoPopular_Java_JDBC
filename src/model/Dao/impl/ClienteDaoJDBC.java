@@ -2,8 +2,8 @@ package model.Dao.impl;
 
 import bancoDados.DBconection;
 import bancoDados.DBexception;
-import com.mysql.cj.util.SaslPrep;
 import entities.Cliente;
+import entities.CpfCnpjValidator;
 import entities.TipoDePessoa;
 import model.Dao.ClienteDAO;
 
@@ -24,32 +24,48 @@ public class ClienteDaoJDBC implements ClienteDAO {
         PreparedStatement st = null;
         try{
             st = conn.prepareStatement("INSERT INTO cliente " +
-                    "(nome, email, cpf_cnpj, tipoDePessoa, tipoDeConta, dataAberturaConta) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "(nome, email, cpf_cnpj, tipoDePessoa, tipoDeConta, dataAberturaConta, saldoBancario) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             st.setString(1, obj.getNome());
             st.setString(2, obj.getEmail());
             st.setLong(3, obj.getCpf_Cnpj());
             st.setString(4, String.valueOf(obj.getTipoDePessoa()));
-            st.setString(5,null);
+            st.setString(5, String.valueOf(obj.getContaBancaria().getTipoDeConta()));
             st.setDate(6, null);
-            st.executeUpdate();
+            st.setFloat(7,obj.getContaBancaria().getSaldoBancario());
 
+            st.executeUpdate();
 
         } catch (SQLException e) {
             throw new DBexception(e.getMessage());
         }
+
         finally {
             DBconection.closeStatement(st);
         }
     }
 
     @Override
-    public void delete(long cpf_Cnpj) {
+    public void delete(String cpf_Cnpj) {
         PreparedStatement st = null;
         try {
             st = conn.prepareStatement("DELETE FROM cliente " +
                     "WHERE cpf_cnpj = ?");
-            st.setLong(1,cpf_Cnpj);
+            if (CpfCnpjValidator.isCpf(String.valueOf(cpf_Cnpj))){
+                cpf_Cnpj = cpf_Cnpj.replace(".", "");
+                cpf_Cnpj = cpf_Cnpj.replace("-", "");
+                st.setLong(1, Long.parseLong(cpf_Cnpj));
+            }
+            if (CpfCnpjValidator.isCnpj(String.valueOf(cpf_Cnpj))){
+               cpf_Cnpj = cpf_Cnpj.replace(".", "");
+                cpf_Cnpj = cpf_Cnpj.replace("-", "");
+                cpf_Cnpj = cpf_Cnpj.replace("/", "");
+                st.setLong(1, Long.parseLong(cpf_Cnpj));
+            }
+            else {
+                throw new RuntimeException("Erro! Digite um CPF ou CNPJ VALIDO");
+            }
+
             st.executeUpdate();
 
         } catch (SQLException e) {
@@ -63,40 +79,60 @@ public class ClienteDaoJDBC implements ClienteDAO {
     @Override
     public void uptade(Cliente obj) {
         PreparedStatement st = null;
-        try{
-            st = conn.prepareStatement("UPDATE cliente " +
-                    "SET nome = ?, email = ?, tipoDePessoa = ?, tipoDeConta = ?, dataAberturaConta = ? " +
-                    "WHERE cpf_cnpj = ?");
-            st.setString(1,obj.getNome());
-            st.setString(2, obj.getEmail());
-            st.setString(3, String.valueOf(obj.getTipoDePessoa()));
-            st.setString(4, null);
-            st.setDate(5, null);
-            st.setLong(6, obj.getCpf_Cnpj());
-            st.executeUpdate();
+        if ((CpfCnpjValidator.isCnpj(String.valueOf(obj.getCpf_Cnpj()))) || (CpfCnpjValidator.isCpf(String.valueOf(obj.getCpf_Cnpj()))) ){
 
-        } catch (SQLException e) {
-            throw new DBexception(e.getMessage());
-        }
-        finally {
-            DBconection.closeStatement(st);
+            try{
+                st = conn.prepareStatement("UPDATE cliente " +
+                        "SET nome = ?, email = ? " +
+                        "WHERE cpf_cnpj = ?");
+                st.setString(1,obj.getNome());
+                st.setString(2, obj.getEmail());
+                st.setLong(3, obj.getCpf_Cnpj());
+
+                st.executeUpdate();
+
+            } catch (SQLException e) {
+                throw new DBexception(e.getMessage());
+            }
+            finally {
+                DBconection.closeStatement(st);
+            }
         }
 
     }
 
     @Override
-    public Cliente findCliente(long cpf_Cnpj) {
+    public Cliente findCliente(String cpf_Cnpj) {
         PreparedStatement st = null;
         ResultSet rs = null;
 
         try {
             st = conn.prepareStatement("SELECT * FROM bancopopular.cliente WHERE cpf_cnpj = ?");
-            st.setLong(1,cpf_Cnpj);
-            rs = st.executeQuery();
-            if (rs.next()){
-                Cliente cliente = instantiateCliente(rs);
-                return cliente;
+
+            if (CpfCnpjValidator.isCpf(cpf_Cnpj)){
+                cpf_Cnpj = cpf_Cnpj.replace(".", "");
+                cpf_Cnpj = cpf_Cnpj.replace("-", "");
+                st.setLong(1, Long.parseLong(cpf_Cnpj));
+                rs = st.executeQuery();
+                if (rs.next()) {
+                    Cliente cliente = instantiateCliente(rs);
+                    return cliente;
+                }
             }
+
+
+            if (CpfCnpjValidator.isCnpj(cpf_Cnpj)){
+                cpf_Cnpj = cpf_Cnpj.replace(".", "");
+                cpf_Cnpj = cpf_Cnpj.replace("-", "");
+                cpf_Cnpj = cpf_Cnpj.replace("/", "");
+                st.setLong(1, Long.parseLong(cpf_Cnpj));
+                rs = st.executeQuery();
+                if (rs.next()){
+                    Cliente cliente = instantiateCliente(rs);
+                    return cliente;
+                }
+            }
+
             else {
                 throw new RuntimeException("Error! não foi possivel achar o cliente.");
             }
@@ -106,6 +142,7 @@ public class ClienteDaoJDBC implements ClienteDAO {
             DBconection.closeResultSet(rs);
             DBconection.closeStatement(st);
         }
+        return null;
     }
     public Cliente instantiateCliente(ResultSet rs) throws SQLException {
         Cliente cliente = new Cliente();
@@ -118,8 +155,8 @@ public class ClienteDaoJDBC implements ClienteDAO {
 
     @Override
     public List<Cliente> findAll() {
-        PreparedStatement st = null;
-        ResultSet rs = null;
+        PreparedStatement st;
+        ResultSet rs;
         List<Cliente> clientes = new ArrayList<>();
         try{
             st = conn.prepareStatement("SELECT * FROM cliente");

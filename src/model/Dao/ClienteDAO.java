@@ -8,11 +8,11 @@ public interface ClienteDAO {
 
     void insert (Cliente obj);
 
-    void delete (long cpf_Cnpj);
+    void delete (String cpf_Cnpj);
 
     void uptade (Cliente obj);
 
-    Cliente findCliente (long cpf_Cnpj);
+    Cliente findCliente (String cpf_Cnpj);
 
     List<Cliente> findAll();
 

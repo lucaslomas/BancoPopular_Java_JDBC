@@ -13,10 +13,10 @@ public class Cliente {
 
     public Cliente() {
     }
-    public Cliente(String nome, String email, TipoDePessoa tipoDePessoa) {
+    public Cliente(String nome, String email, String cpf_Cnpj) {
         this.nome = nome;
         this.email = email;
-        this.tipoDePessoa = tipoDePessoa;
+        this.cpf_Cnpj = CPForCNPJ(cpf_Cnpj);
     }
 
     public Cliente(String nome, String email, TipoDePessoa tipoDePessoa, ContaBancaria contaBancaria) {
@@ -75,22 +75,14 @@ public class Cliente {
     }
 
   public long CPForCNPJ(String cpf_cnpj){
-        if (tipoDePessoa == TipoDePessoa.FISICA){
-            if (validacaoCPF(cpf_cnpj)){
-                return Long.parseLong(cpf_cnpj);
-            }
-            else {
-                throw new RuntimeException("Erro!! Insira um cpf valido para a pessoa fisica");
-            }
+        if (validacaoCPF(cpf_cnpj)){
+            tipoDePessoa = TipoDePessoa.FISICA;
+            return Long.parseLong(cpf_cnpj);
 
         }
-        if(tipoDePessoa == TipoDePessoa.JURIDICA){
-            if (validacaoCNPJ(cpf_cnpj)){
-                return Long.parseLong(cpf_cnpj);
-            }
-            else {
-                throw new RuntimeException("Erro!! Insira um CNPJ valido para a pessoa Juridica");
-            }
+        if(validacaoCNPJ(cpf_cnpj)){
+            tipoDePessoa = TipoDePessoa.JURIDICA;
+            return Long.parseLong(cpf_cnpj);
         }
         else {
             throw new RuntimeException("Error!! Insira um CPF OU CNPJ valido!");
@@ -99,11 +91,10 @@ public class Cliente {
 
     @Override
     public String toString() {
-        return "Cliente{" +
+        return "Cliente" +
                 "nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
                 ", cpf_Cnpj=" + String.valueOf(cpf_Cnpj) +
-                ", tipoDePessoa=" + tipoDePessoa +
-                '}';
+                ", tipoDePessoa=" + tipoDePessoa;
     }
 }

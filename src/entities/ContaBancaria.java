@@ -1,15 +1,26 @@
 package entities;
 
+import entities.tiposDeConta.TipoDeConta;
+
 import java.util.Date;
 
 public class ContaBancaria {
     private Date dataDeAberturaConta;
-    private Double saldoBancario;
+    private Float saldoBancario;
 
     private int agencia;
 
     private int numeroConta;
 
+    private TipoDeConta tipoDeConta;
+
+    public TipoDeConta getTipoDeConta() {
+        return tipoDeConta;
+    }
+
+    public void setTipoDeConta(TipoDeConta tipoDeConta) {
+        this.tipoDeConta = tipoDeConta;
+    }
 
     public Date getDataDeAberturaConta() {
         return dataDeAberturaConta;
@@ -19,20 +30,20 @@ public class ContaBancaria {
         this.dataDeAberturaConta = dataDeAberturaConta;
     }
 
-    public Double getSaldoBancario() {
+    public Float getSaldoBancario() {
         return saldoBancario;
     }
-    public void setSaldoBancario(Double saldoBancario){
+    public void setSaldoBancario(Float saldoBancario){
         this.saldoBancario = saldoBancario;
     }
 
-    public Double deposito(Double quantia){
-        return 0.0;
+    public Float deposito(Float quantia){
+        return Float.valueOf(0);
 
     }
 
-    public Double transferencia(Double quantia){
-        return 0.0;
+    public Float transferencia(Float quantia){
+        return Float.valueOf(0);
     }
 
 

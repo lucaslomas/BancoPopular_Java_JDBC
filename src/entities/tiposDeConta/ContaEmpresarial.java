@@ -8,10 +8,20 @@ public class ContaEmpresarial extends ContaBancaria {
     private double limiteDeCredito;
     private TipoDeConta tipoDeConta = TipoDeConta.CE;
 
-    public ContaEmpresarial(Date aberturaConta, double limiteCredito, double saldoBancario) {
+    public ContaEmpresarial(Date aberturaConta, double limiteCredito, float saldoBancario   ) {
         setDataDeAberturaConta(aberturaConta);
         setSaldoBancario(saldoBancario);
         this.limiteDeCredito = limiteCredito;
+    }
+
+    @Override
+    public TipoDeConta getTipoDeConta() {
+        return tipoDeConta;
+    }
+
+    @Override
+    public void setTipoDeConta(TipoDeConta tipoDeConta) {
+        this.tipoDeConta = tipoDeConta;
     }
 
     public double getLimiteDeCredito() {
@@ -22,23 +32,23 @@ public class ContaEmpresarial extends ContaBancaria {
         this.limiteDeCredito = limiteDeCredito;
     }
     @Override
-    public Double deposito(Double quantia) {
+    public Float deposito(Float quantia) {
         if (quantia > 1000000)
             throw new RuntimeException("Error! você não tem permisão para realizar esse deposito");
         else {
-            Double novoSaldo = getSaldoBancario() + quantia;
+            Float novoSaldo = getSaldoBancario() + quantia;
             setSaldoBancario(novoSaldo);
             return getSaldoBancario();
         }
     }
 
     @Override
-    public Double transferencia(Double quantia) {
+    public Float transferencia(Float quantia) {
         if(quantia > 1000000){
             throw new RuntimeException("Error! você não tem limite de transferencia suficiente para realizar essa ação");
         }
         else {
-            Double novoSaldo = getSaldoBancario() - quantia;
+            Float novoSaldo = getSaldoBancario() - quantia;
             setSaldoBancario(novoSaldo);
             return getSaldoBancario();
         }
